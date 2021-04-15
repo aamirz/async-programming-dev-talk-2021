@@ -2,18 +2,18 @@ package main
 
 import (
 	"fmt"
-	"time"
+//	"time"
 )
 
 func increment(counter *int) {
-	for i := 0; i < 1000000; i++ {
+	for i := 0; i < 100; i++ {
 		*counter = *counter + 1
 	}
 }
 
 func decrement(counter *int) {
 
-	for i := 0; i < 1000000; i++ {
+	for i := 0; i < 100; i++ {
 		*counter = *counter - 1
 	}
 }
@@ -30,6 +30,6 @@ func main() {
 		decrement(&counter)
 	}
 
-	time.Sleep(time.Second * 5)
+	// time.Sleep(time.Second * 5)
 	fmt.Printf("Counter = %v\n", counter)
 }
