@@ -9,7 +9,7 @@ import (
 
 func printMessage(messages chan string, w *sync.WaitGroup) {
     message := <-messages
-    fmt.Println(message)
+    fmt.Printf("The message is: %s", message)
     w.Done()
 }
 
