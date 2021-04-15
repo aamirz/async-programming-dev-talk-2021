@@ -1,0 +1,35 @@
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func increment(counter *int) {
+	for i := 0; i < 100; i++ {
+		*counter = *counter + 1
+	}
+}
+
+func decrement(counter *int) {
+
+	for i := 0; i < 100; i++ {
+		*counter = *counter - 1
+	}
+}
+
+func main() {
+
+	counter := 0
+
+	for i := 0; i < 1000; i++ {
+		go increment(&counter)
+	}
+
+	for i := 0; i < 1000; i++ {
+		go decrement(&counter)
+	}
+
+    time.Sleep(time.Second * 4)
+	fmt.Printf("Counter = %v\n", counter)
+}
