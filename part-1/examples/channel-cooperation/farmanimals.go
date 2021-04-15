@@ -31,6 +31,7 @@ func scree(messages chan string, w *sync.WaitGroup) {
 
 
 func megaphone(messages chan string, done chan bool) {
+     fmt.Printf("playing voicemails from farmanimals to McMaster-Carr!\n")
      for {
      message, more  := <-messages
      if (more) {
