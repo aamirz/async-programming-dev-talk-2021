@@ -56,8 +56,11 @@ func main() {
      go scree(messages, &w)
 
      go megaphone(messages, done)
+
+	// this awaits all the animals
      w.Wait()
      close(messages)
 
+	// await the megaphone
      <-done
 }
