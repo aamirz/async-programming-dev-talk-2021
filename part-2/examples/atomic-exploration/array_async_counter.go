@@ -19,40 +19,39 @@ func newContext(counter *int, flag *int32, w *sync.WaitGroup) *Context {
 	return &context
 }
 
-func increment(threadId int, context *Context) {
-
-	// naive lock
+func (context *Context) Lock() {
+		// naive lock
 	for ;; {
 		if (atomic.CompareAndSwapInt32(context.atomicFlag, 0, 1)) {
 			break;
 		}
 	}
+}
 
+func (context *Context) Unlock() {
+	atomic.CompareAndSwapInt32(context.atomicFlag, 1, 0)
+}
+
+func increment(threadId int, context *Context) {
+
+	context.Lock()
 	fmt.Printf("Thread %v incrementing\n", threadId)
 	for i := 0; i < 100; i++ {
 		*context.counter = *context.counter + 1
 	}
-
-	atomic.CompareAndSwapInt32(context.atomicFlag, 1, 0)
+	context.Unlock()
 
     context.w.Done()
 }
 
 func decrement(threadId int, context *Context) {
-
- 	// naive lock
-	for ;; {
-		if (atomic.CompareAndSwapInt32(context.atomicFlag, 0, 1)) {
-			break;
-		}
-	}
-
+	context.Lock()
 	fmt.Printf("Thread %v decrementing\n", threadId)
 	for i := 0; i < 100; i++ {
 		*context.counter = *context.counter - 1
 	}
+	context.Unlock()
 
-    atomic.CompareAndSwapInt32(context.atomicFlag, 1, 0)
     context.w.Done()
 }
 
