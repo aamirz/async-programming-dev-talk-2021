@@ -8,61 +8,72 @@ import (
 )
 
 
-func increment(threadId int,
-	counter *int, atomicFlag *int32, w *sync.WaitGroup) {
+type Context struct {
+	counter *int
+	atomicFlag *int32
+	w *sync.WaitGroup
+}
+
+func newContext(counter *int, flag *int32, w *sync.WaitGroup) *Context {
+	context := Context{counter: counter, atomicFlag: flag, w: w}
+	return &context
+}
+
+func increment(threadId int, context *Context) {
 
 	// naive lock
 	for ;; {
-		if (atomic.CompareAndSwapInt32(atomicFlag, 0, 1)) {
+		if (atomic.CompareAndSwapInt32(context.atomicFlag, 0, 1)) {
 			break;
 		}
 	}
 
 	fmt.Printf("Thread %v incrementing\n", threadId)
 	for i := 0; i < 100; i++ {
-		*counter = *counter + 1
+		*context.counter = *context.counter + 1
 	}
 
-	atomic.CompareAndSwapInt32(atomicFlag, 1, 0)
+	atomic.CompareAndSwapInt32(context.atomicFlag, 1, 0)
 
-    w.Done()
+    context.w.Done()
 }
 
-func decrement(threadId int,
-	counter *int, atomicFlag *int32,  w *sync.WaitGroup) {
+func decrement(threadId int, context *Context) {
 
  	// naive lock
 	for ;; {
-		if (atomic.CompareAndSwapInt32(atomicFlag, 0, 1)) {
+		if (atomic.CompareAndSwapInt32(context.atomicFlag, 0, 1)) {
 			break;
 		}
 	}
 
 	fmt.Printf("Thread %v decrementing\n", threadId)
 	for i := 0; i < 100; i++ {
-		*counter = *counter - 1
+		*context.counter = *context.counter - 1
 	}
 
-    atomic.CompareAndSwapInt32(atomicFlag, 1, 0)
-    w.Done()
+    atomic.CompareAndSwapInt32(context.atomicFlag, 1, 0)
+    context.w.Done()
 }
 
 func main() {
-
-	threads := 10
+	threads := 20
 	counter := 0
     var w sync.WaitGroup
-	var atomicFlag int32
+	var flag int32
+
+	context := newContext(&counter, &flag, &w)
+
 	threadId := 0
-	for i := 0; i < threads; i++ {
+	for i := 0; i < threads/2; i++ {
         w.Add(1)
-		go increment(threadId, &counter, &atomicFlag, &w)
+		go increment(threadId, context)
 		threadId++
 	}
 
-	for i := 0; i < threads; i++ {
+	for i := 0; i < threads/2; i++ {
         w.Add(1)
-		go decrement(threadId, &counter, &atomicFlag, &w)
+		go decrement(threadId, context)
 		threadId++
 	}
 
