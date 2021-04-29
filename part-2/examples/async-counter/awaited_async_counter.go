@@ -6,8 +6,9 @@ import (
     "sync"
 )
 
-func increment(counter *int, m *sync.Mutex, w *sync.WaitGroup) {
+func increment(threadId int, counter *int, m *sync.Mutex, w *sync.WaitGroup) {
     m.Lock()
+	fmt.Printf("Thread %v incrementing\n", threadId)
 	for i := 0; i < 100; i++ {
 		*counter = *counter + 1
 	}
@@ -15,8 +16,9 @@ func increment(counter *int, m *sync.Mutex, w *sync.WaitGroup) {
     w.Done()
 }
 
-func decrement(counter *int, m *sync.Mutex, w *sync.WaitGroup) {
+func decrement(threadId int, counter *int, m *sync.Mutex, w *sync.WaitGroup) {
     m.Lock()
+	fmt.Printf("Thread %v decrementing\n", threadId)
 	for i := 0; i < 100; i++ {
 		*counter = *counter - 1
 	}
@@ -26,18 +28,22 @@ func decrement(counter *int, m *sync.Mutex, w *sync.WaitGroup) {
 
 func main() {
 
+	threads := 10
 	counter := 0
     var m sync.Mutex
     var w sync.WaitGroup
 
-	for i := 0; i < 1000; i++ {
+	threadId := 0
+	for i := 0; i < threads; i++ {
         w.Add(1)
-		go increment(&counter, &m, &w)
+		go increment(threadId, &counter, &m, &w)
+		threadId++
 	}
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < threads; i++ {
         w.Add(1)
-		go decrement(&counter, &m, &w)
+		go decrement(threadId, &counter, &m, &w)
+		threadId++
 	}
 
     // remove this nasty nasty line
